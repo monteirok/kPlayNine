@@ -1,4 +1,6 @@
 import Card from '../helpers/card';
+import Zone from '../helpers/zone';
+import { config } from '../index';
 
 // exporting (creating) a new class called 'Game' that extends the 'scene' class that already exists within Phaser
 export default class Game extends Phaser.Scene {
@@ -29,6 +31,13 @@ export default class Game extends Phaser.Scene {
         // allows access to 'this' (the game scene) within the other functions (don't have to worry about the scope of those functions)
         let self = this;
 
+        // create a new instance of the 'dropZone' class and pass it to the scene (this)
+        this.zone = new Zone(this);
+        // render the dropZone
+        this.dropZone = this.zone.renderZone();
+        // render an outline for the dropZone
+        this.outline = this.zone.renderOutline(this.dropZone);
+
         /**
          * dealCards() Function
          */
@@ -42,8 +51,12 @@ export default class Game extends Phaser.Scene {
             }
         }
 
-        // create 'deal cards' text that functions similar to a button -- allows the user to deal cards onto the screen
-        this.dealText = this.add.text(75, 350, ['DEAL CARDS']).setFontSize(32).setFontFamily('Arial').setFontStyle('bold').setColor('#EE6C4D').setInteractive();
+        // store the value of the height of the scene
+        const sceneHeight = config.height;
+        // the expression 'sceneHeight / 2 - (32 / 2)' vertically centers 'dealText', where '32' is the value of the its font size
+        const verticallyCenteredDealTextHeight = sceneHeight / 2 - (32 / 2);
+        // create the 'DEAL CARDS' text that functions similar to a button -- allows the user to deal cards onto the screen
+        this.dealText = this.add.text(20, verticallyCenteredDealTextHeight, ['DEAL CARDS']).setFontSize(32).setFontFamily('Arial').setFontStyle('bold').setColor('#c6c6c6e8').setInteractive();
 
         // executes dealCards() when 'dealText' is clicked (pointer down)
         this.dealText.on('pointerdown', function () {
@@ -52,12 +65,29 @@ export default class Game extends Phaser.Scene {
 
         // changes color of 'dealText' on hover (pointer over) -- shows user that this text is clickable
         this.dealText.on('pointerover', function () {
-            self.dealText.setColor('#F39882');
+            self.dealText.setColor('#9e9e9e');
+            self.dealText.setScale(.98);
+            self.dealText.setX(22);
         })
 
         // resets the color of 'dealText' after hover (pointer out)
         this.dealText.on('pointerout', function () {
-            self.dealText.setColor('#EE6C4D');
+            self.dealText.setColor('#c6c6c6e8');
+            self.dealText.setScale(1);
+            self.dealText.setX(20);
+        })
+
+        // highlights the outer edges of a card when it's dragged to inform the user that they've selected it
+        this.input.on('dragstart', function (pointer, gameObject) {
+            gameObject.setTint(0xFF7043);
+            // allows the highlight to render over other objects in the scene
+            self.children.bringToTop(gameObject);
+        })
+
+        // un-highlights the outer edges of a card when it's dropped (no longer being dragged)
+        this.input.on('dragend', function (pointer, gameObject) {
+            // removes the tint
+            gameObject.setTint();
         })
 
         // enable the draggable functionality for the cards

@@ -1,0 +1,15 @@
+/* stylesheet for 'index.html' */
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #121212;
+}
+
+canvas {
+    border: 6px solid #c6c6c6e8;
+    border-radius: 8px;
+}

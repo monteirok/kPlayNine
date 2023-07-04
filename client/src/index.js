@@ -13,3 +13,6 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+
+// export the 'config' object so the values of it's variables can be accessed within other files
+export { config };
