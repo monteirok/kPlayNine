@@ -6,7 +6,7 @@ export default class Zone {
             // store the value of the height of the scene
             const sceneHeight = config.height;
             // '700' & 'sceneHeight / 2' = the x/y coordinates of origin of the dropZone, and '900' & '250' = the width/height of the dropZone
-            let dropZone = scene.add.zone(700, sceneHeight / 2, 900, 250).setRectangleDropZone(900, 250);
+            let dropZone = scene.add.zone(700, sceneHeight / 2, 750, 500).setRectangleDropZone(750, 500);
             dropZone.setData({ cards: 0 }); // refer to Phaser docs
 
             return dropZone;

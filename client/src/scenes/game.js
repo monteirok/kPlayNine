@@ -1,6 +1,7 @@
 import Card from '../helpers/card';
 import Zone from '../helpers/zone';
 import { config } from '../index';
+import io from 'socket.io-client';
 
 // exporting (creating) a new class called 'Game' that extends the 'scene' class that already exists within Phaser
 export default class Game extends Phaser.Scene {
@@ -39,6 +40,16 @@ export default class Game extends Phaser.Scene {
         this.outline = this.zone.renderOutline(this.dropZone);
 
         /**
+         * SERVER
+         */
+        // create a connection to 3000
+        this.socket = io('http://localhost:3000');
+
+        this.socket.on('connect', function () {
+            console.log('Connected!');
+        });
+
+        /**
          * dealCards() Function
          */
         this.dealCards = () => {
@@ -55,46 +66,83 @@ export default class Game extends Phaser.Scene {
         const sceneHeight = config.height;
         // the expression 'sceneHeight / 2 - (32 / 2)' vertically centers 'dealText', where '32' is the value of the its font size
         const verticallyCenteredDealTextHeight = sceneHeight / 2 - (32 / 2);
-        // create the 'DEAL CARDS' text that functions similar to a button -- allows the user to deal cards onto the screen
-        this.dealText = this.add.text(20, verticallyCenteredDealTextHeight, ['DEAL CARDS']).setFontSize(32).setFontFamily('Arial').setFontStyle('bold').setColor('#c6c6c6e8').setInteractive();
 
+        // create the 'DEAL CARDS' text that functions similar to a button -- deals cards onto the screen when clicked
+        this.dealText = this.add.text(22, verticallyCenteredDealTextHeight, ['DEAL CARDS']).setFontSize(42).setFontFamily('Arial').setFontStyle('bold').setColor('#ced7e6').setPadding(2).setInteractive();
+
+        /**
+         * dealText FUNCTIONALITY
+         */
         // executes dealCards() when 'dealText' is clicked (pointer down)
         this.dealText.on('pointerdown', function () {
             self.dealCards();
         })
-
         // changes color of 'dealText' on hover (pointer over) -- shows user that this text is clickable
         this.dealText.on('pointerover', function () {
-            self.dealText.setColor('#9e9e9e');
-            self.dealText.setScale(.98);
+            // self.dealText.setColor('#b6c4d9');
+            self.dealText.setColor('#ced7e6b6');
+            self.dealText.setScale(.97);
+            self.dealText.setX(25);
+        })
+        // resets the color of 'dealText' after hover (pointer out)
+        this.dealText.on('pointerout', function () {
+            self.dealText.setColor('#ced7e6');
+            self.dealText.setScale(1);
             self.dealText.setX(22);
         })
 
-        // resets the color of 'dealText' after hover (pointer out)
-        this.dealText.on('pointerout', function () {
-            self.dealText.setColor('#c6c6c6e8');
-            self.dealText.setScale(1);
-            self.dealText.setX(20);
-        })
-
+        /**
+         * 'card highlights' when selected FUNCTIONALITY
+         */
         // highlights the outer edges of a card when it's dragged to inform the user that they've selected it
         this.input.on('dragstart', function (pointer, gameObject) {
-            gameObject.setTint(0xFF7043);
+            gameObject.setTint(0x5bfff1);
             // allows the highlight to render over other objects in the scene
             self.children.bringToTop(gameObject);
         })
-
         // un-highlights the outer edges of a card when it's dropped (no longer being dragged)
-        this.input.on('dragend', function (pointer, gameObject) {
+        this.input.on('dragend', function (pointer, gameObject, dropped) {
             // removes the tint
             gameObject.setTint();
+
+            // if card isn't dropped in a drop zone, return it to its origin
+            if (!dropped) {
+                gameObject.x = gameObject.input.dragStartX;
+                gameObject.y = gameObject.input.dragStartY;
+            }
         })
 
-        // enable the draggable functionality for the cards
+        /**
+         * enables dragable FUNCTIONALITY
+         */
         this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
             // when a gameObject is dragged, the X and Y coordinates of that gameObject should be equal to the X and Y coordinates of the dragging event
             gameObject.x = dragX;
             gameObject.y = dragY;
+        })
+
+        /**
+         * dropZone FUNCTIONALITY
+         */
+        this.input.on('drop', function (pointer, gameObject, dropZone) {
+            // calculate the row index
+            var rowIndex = Math.floor(dropZone.data.values.cards / 4);
+            // calculate the column index
+            var colIndex = dropZone.data.values.cards % 4;
+        
+            // increment the card value within the drop zone data
+            dropZone.data.values.cards++;
+        
+            // center the cards (x/y coordinates) inside the drop zone
+            gameObject.x = (dropZone.x - 265) + (colIndex * 175);
+            gameObject.y = dropZone.y + (rowIndex * 110);
+
+            // decrease the y-coordinate of the first row to vertically center the cards within the drop zone
+            if (rowIndex === 0) {
+                gameObject.y -= 113;
+            }
+
+            gameObject.disableInteractive();
         })
     }
 
