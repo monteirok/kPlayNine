@@ -1,7 +1,7 @@
 import Card from '../helpers/card';
 import Zone from '../helpers/zone';
 import { config } from '../index';
-// import io from 'socket.io-client';
+import io from 'socket.io-client';
 
 // exporting (creating) a new class called 'Game' that extends the 'scene' class that already exists within Phaser
 export default class Game extends Phaser.Scene {
@@ -43,11 +43,12 @@ export default class Game extends Phaser.Scene {
          * SERVER
          */
         // create a connection to 3000
-        //this.socket = io('http://localhost:3000');
+        // this.socket = io('http://localhost:3000');
+        this.socket = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']}); // had to add 'transports' to get it to work
 
-        //this.socket.on('connect', function () {
-          //  console.log('Connected!');
-        //});
+        this.socket.on('connect', function () {
+           console.log('Connected!');
+        });
 
         /**
          * dealCards() Function
