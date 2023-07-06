@@ -47,7 +47,9 @@ export default class Game extends Phaser.Scene {
         this.socket = io('http://localhost:3000', {transports: ['websocket', 'polling', 'flashsocket']}); // had to add 'transports' to get it to work
 
         this.socket.on('connect', function () {
-           console.log('Connected!');
+            console.log('%c\nConnected! %c\nWelcome to kPlayNine, enjoy! :)\n',
+                        'color: #7af77a; font-family: monospace; font-size: 34px; font-weight: 600; font-style: italic; text-shadow: 1px 1px 0 #5cc75c, 2px 2px 0 #3fa33f, 3px 3px 0 #2c802c, 4px 4px 0 #1f5f1f;',
+                        'color: #f9ffa3; font-size: 18px; font-weight: 500; font-family: monospace; font-style: italic; text-shadow: 1px 1px 0 #b3b34d;');
         });
 
         /**
